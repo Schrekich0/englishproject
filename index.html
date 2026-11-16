@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Защитники природы — командная игра</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg1:#aef0c6;
+    --bg2:#8fe3e0;
+    --card:#ffffff;
+    --text:#1f3a2c;
+    --muted:#4d6b58;
+    --green:#2fb86a;
+    --green-dark:#1f8f4f;
+    --blue:#3aa0e8;
+    --red:#ff6f61;
+    --gold:#ffbe3d;
+    --purple:#9b6bd9;
+    --pink:#ff6fa5;
+    --border:#d6ead9;
+    --team1:#3aa0e8;
+    --team1-dark:#2b7fc0;
+    --team2:#9b6bd9;
+    --team2-dark:#7a4fb8;
+    --team3:#ff9d3d;
+    --team3-dark:#e07d1f;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg1:#0f2a1e;
+      --bg2:#0d3030;
+      --card:#1b2e21;
+      --text:#eaf7ec;
+      --muted:#a9c4b2;
+      --border:#2b4535;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg1:#0f2a1e;
+    --bg2:#0d3030;
+    --card:#1b2e21;
+    --text:#eaf7ec;
+    --muted:#a9c4b2;
+    --border:#2b4535;
+    color-scheme: dark;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  html{scroll-padding-top: env(safe-area-inset-top,0px);}
+  body{
+    margin:0;
+    min-height:100%;
+    background:linear-gradient(160deg,var(--bg1),var(--bg2));
+    color:var(--text);
+    font-family:"Baloo 2","Trebuchet MS",sans-serif;
+    padding-top: env(safe-area-inset-top,0px);
+    padding-bottom: env(safe-area-inset-bottom,0px);
+    display:flex;
+    justify-content:center;
+    overflow-x:hidden;
+    position:relative;
+  }
+  .floaty{
+    position:fixed;
+    font-size:2.4rem;
+    opacity:.5;
+    pointer-events:none;
+    animation: drift 14s ease-in-out infinite;
+    z-index:0;
+  }
+  .f1{top:6%; left:4%; animation-delay:0s;}
+  .f2{top:14%; right:6%; animation-delay:2s; font-size:2rem;}
+  .f3{top:78%; left:3%; animation-delay:4s; font-size:2.4rem;}
+  .f4{top:85%; right:5%; animation-delay:1s; font-size:2rem;}
+  @keyframes drift{
+    0%,100%{transform:translateY(0) rotate(-4deg);}
+    50%{transform:translateY(-18px) rotate(4deg);}
+  }
+  .wrap{
+    width:100%;
+    max-width:860px;
+    padding:24px 16px 46px;
+    position:relative;
+    z-index:1;
+  }
+  h1{
+    text-align:center;
+    font-size:clamp(2.2rem,6.5vw,3.6rem);
+    margin:4px 0 4px;
+    font-weight:800;
+    color:var(--green-dark);
+    text-shadow:0 2px 0 rgba(255,255,255,0.6);
+  }
+  .subtitle{
+    text-align:center;
+    color:var(--muted);
+    margin:0 0 18px;
+    font-size:clamp(1.3rem,2.5vw,1.7rem);
+    font-weight:600;
+  }
+  .teams-bar{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:10px;
+    margin-bottom:16px;
+  }
+  .team-chip{
+    border-radius:16px;
+    padding:10px 8px;
+    text-align:center;
+    color:#fff;
+    font-weight:700;
+    box-shadow:0 4px 0 rgba(0,0,0,0.15);
+  }
+  .team-chip .tname{font-size:clamp(1.1rem,2vw,1.4rem); opacity:.9;}
+  .team-chip .tscore{font-size:clamp(2rem,4vw,2.8rem); font-weight:800;}
+  .team-chip.t1{background:linear-gradient(140deg,var(--team1),var(--team1-dark));}
+  .team-chip.t2{background:linear-gradient(140deg,var(--team2),var(--team2-dark));}
+  .team-chip.t3{background:linear-gradient(140deg,var(--team3),var(--team3-dark));}
+  .progress-wrap{
+    background:rgba(255,255,255,0.6);
+    border:2px solid var(--border);
+    border-radius:20px;
+    height:18px;
+    overflow:hidden;
+    margin-bottom:18px;
+    box-shadow:inset 0 2px 4px rgba(0,0,0,0.08);
+  }
+  .progress-bar{
+    height:100%;
+    background:linear-gradient(90deg,var(--gold),var(--green));
+    width:0%;
+    border-radius:20px;
+    transition:width .5s cubic-bezier(.4,1.4,.6,1);
+  }
+  .qcounter{
+    text-align:center;
+    font-size:clamp(1.3rem,2.5vw,1.7rem);
+    font-weight:700;
+    color:var(--green-dark);
+    margin-bottom:10px;
+  }
+  .card{
+    background:var(--card);
+    border-radius:28px;
+    padding:28px 22px;
+    box-shadow:0 14px 32px rgba(20,60,40,0.18);
+    border:3px solid var(--border);
+    animation: card-in .45s cubic-bezier(.3,1.3,.5,1);
+  }
+  @keyframes card-in{
+    0%{transform:translateY(24px) scale(.96); opacity:0;}
+    100%{transform:translateY(0) scale(1); opacity:1;}
+  }
+  .qimg-wrap{
+    display:flex;
+    justify-content:center;
+    margin-bottom:14px;
+    animation: bob 2.8s ease-in-out infinite;
+  }
+  .qimg-wrap svg{
+    width:150px;
+    height:150px;
+    filter:drop-shadow(0 6px 10px rgba(0,0,0,0.15));
+  }
+  @keyframes bob{
+    0%,100%{transform:translateY(0) rotate(-3deg);}
+    50%{transform:translateY(-8px) rotate(3deg);}
+  }
+  .prompt{
+    font-size:clamp(1.7rem,4.5vw,2.5rem);
+    font-weight:700;
+    margin:0 0 26px;
+    line-height:1.4;
+    text-align:center;
+  }
+  .options{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:14px;
+  }
+  @media (max-width:560px){
+    .options{grid-template-columns: 1fr;}
+  }
+  .opt{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    width:100%;
+    text-align:left;
+    border:3px solid #d6ead9;
+    background:#f7fdf8;
+    color:#1f3a2c;
+    border-radius:18px;
+    padding:20px 18px;
+    font-size:clamp(1.3rem,2.4vw,1.65rem);
+    font-weight:600;
+    font-family:inherit;
+    cursor:pointer;
+    transition:transform .15s ease, border-color .15s ease, background .15s ease, box-shadow .15s ease;
+    min-height:92px;
+    box-shadow:0 4px 0 var(--border);
+  }
+  .opt:hover:not(:disabled){
+    transform:translateY(-3px);
+    border-color:#3aa0e8;
+    box-shadow:0 6px 0 #3aa0e8;
+  }
+  .opt:active:not(:disabled){transform:translateY(1px);}
+  .opt:disabled{cursor:default;}
+  .opt .badge{
+    flex:0 0 auto;
+    width:48px;height:48px;
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:800;
+    font-size:1.4rem;
+    color:#fff;
+  }
+  .opt:nth-child(1) .badge{background:var(--blue);}
+  .opt:nth-child(2) .badge{background:var(--purple);}
+  .opt:nth-child(3) .badge{background:var(--pink);}
+  .opt:nth-child(4) .badge{background:var(--gold);}
+  .opt.correct{
+    border-color:#2fb86a;
+    background:rgba(47,184,106,0.28);
+    color:#14361f;
+    box-shadow:0 6px 0 #1f8f4f;
+    animation: correct-pulse .5s ease;
+  }
+  @keyframes correct-pulse{
+    0%{transform:scale(1);} 40%{transform:scale(1.04);} 100%{transform:scale(1);}
+  }
+  .opt.correct .badge{background:var(--green);}
+  .opt.wrong{
+    border-color:#ff6f61;
+    background:rgba(255,111,97,0.26);
+    color:#4a1712;
+    box-shadow:0 6px 0 #c94f43;
+    animation: shake .45s ease;
+  }
+  .opt.wrong .badge{background:var(--red);}
+  @keyframes shake{
+    0%,100%{transform:translateX(0);}
+    20%{transform:translateX(-8px);} 40%{transform:translateX(8px);}
+    60%{transform:translateX(-5px);} 80%{transform:translateX(5px);}
+  }
+  .feedback{
+    margin-top:18px;
+    padding:18px 20px;
+    border-radius:16px;
+    font-size:clamp(1.25rem,2.2vw,1.5rem);
+    font-weight:600;
+    line-height:1.5;
+    display:none;
+    animation: fade-up .35s ease;
+  }
+  @keyframes fade-up{0%{opacity:0; transform:translateY(8px);} 100%{opacity:1; transform:translateY(0);}}
+  .feedback.show{display:block;}
+  .feedback.ok{background:rgba(47,184,106,0.16);border:2px solid var(--green);}
+  .feedback.bad{background:rgba(255,111,97,0.14);border:2px solid var(--red);}
+  .feedback b{display:block;margin-bottom:6px;font-size:1.4rem;}
+  .hint-btn{
+    margin-top:16px;
+    background:none; border:none;
+    color:var(--blue);
+    font-size:1.25rem; font-weight:700;
+    cursor:pointer; text-decoration:underline;
+    padding:4px 0; font-family:inherit;
+  }
+  .hint-box{
+    display:none; margin-top:8px; padding:14px 18px;
+    background:rgba(58,160,232,0.12); border-radius:14px;
+    font-size:1.25rem; color:var(--muted); font-weight:600;
+  }
+  .hint-box.show{display:block;}
+  .nav-row{display:flex; justify-content:center; margin-top:24px;}
+  .next-btn{
+    background:linear-gradient(90deg,var(--green),var(--green-dark));
+    color:#fff; border:none; border-radius:18px;
+    padding:18px 36px; font-size:1.45rem; font-weight:800;
+    font-family:inherit; cursor:pointer;
+    opacity:0; pointer-events:none;
+    transition:opacity .2s ease, transform .1s ease;
+    box-shadow:0 6px 0 var(--green-dark);
+  }
+  .next-btn.show{opacity:1; pointer-events:auto;}
+  .next-btn:active{transform:translateY(3px); box-shadow:0 2px 0 var(--green-dark);}
+
+  /* modal */
+  .modal-overlay{
+    position:fixed; inset:0;
+    background:rgba(15,30,22,0.55);
+    display:flex; align-items:center; justify-content:center;
+    padding:20px; z-index:100;
+    animation: fade-up .25s ease;
+  }
+  .modal-overlay.hidden{display:none;}
+  .modal-card{
+    background:var(--card);
+    border-radius:26px;
+    padding:28px 24px;
+    max-width:480px;
+    width:100%;
+    text-align:center;
+    box-shadow:0 20px 50px rgba(0,0,0,0.35);
+    animation: card-in .3s cubic-bezier(.3,1.3,.5,1);
+  }
+  .modal-card h3{
+    margin:0 0 8px; font-size:1.8rem; font-weight:800; color:var(--green-dark);
+  }
+  .modal-card p{margin:0 0 22px; color:var(--muted); font-weight:600; font-size:1.3rem;}
+  .team-buttons{display:flex; flex-direction:column; gap:12px;}
+  .team-btn{
+    border:none; border-radius:16px; padding:20px; color:#fff;
+    font-size:1.5rem; font-weight:800; font-family:inherit; cursor:pointer;
+    box-shadow:0 5px 0 rgba(0,0,0,0.2);
+  }
+  .team-btn:active{transform:translateY(3px); box-shadow:0 2px 0 rgba(0,0,0,0.2);}
+  .team-btn.b1{background:linear-gradient(90deg,var(--team1),var(--team1-dark));}
+  .team-btn.b2{background:linear-gradient(90deg,var(--team2),var(--team2-dark));}
+  .team-btn.b3{background:linear-gradient(90deg,var(--team3),var(--team3-dark));}
+  .skip-btn{
+    margin-top:14px; background:none; border:none;
+    color:var(--muted); font-size:1.15rem; font-weight:700;
+    text-decoration:underline; cursor:pointer; font-family:inherit;
+  }
+
+  .result{text-align:center; padding:12px 6px;}
+  .result .emoji{font-size:4.6rem; margin-bottom:8px; display:inline-block; animation: trophy-bounce 1.1s ease infinite;}
+  @keyframes trophy-bounce{0%,100%{transform:translateY(0) scale(1);} 50%{transform:translateY(-14px) scale(1.08);}}
+  .result h2{margin:0 0 16px; font-size:clamp(1.8rem,5.5vw,2.6rem); font-weight:800; color:var(--green-dark);}
+  .final-scores{display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:22px;}
+  .final-chip{
+    border-radius:18px; padding:16px 8px; color:#fff; font-weight:800;
+    box-shadow:0 5px 0 rgba(0,0,0,0.18);
+  }
+  .final-chip .fname{font-size:clamp(1.1rem,2vw,1.4rem); opacity:.9;}
+  .final-chip .fscore{font-size:clamp(2.2rem,4.5vw,3rem);}
+  .final-chip.winner{box-shadow:0 0 0 4px var(--gold), 0 5px 0 rgba(0,0,0,0.18); transform:scale(1.05);}
+  .restart-btn{
+    background:linear-gradient(90deg,var(--gold),#f08c1a);
+    color:#3a2a08; border:none; border-radius:18px;
+    padding:18px 36px; font-size:1.45rem; font-weight:800;
+    font-family:inherit; cursor:pointer;
+    box-shadow:0 6px 0 #c76f0f;
+  }
+  .restart-btn:active{transform:translateY(3px); box-shadow:0 2px 0 #c76f0f;}
+
+  .start-screen{text-align:center;}
+  .start-screen .emoji-row{font-size:2.8rem; margin-bottom:8px;}
+  .start-screen .emoji-row span{display:inline-block; animation: bob 2.2s ease-in-out infinite;}
+  .start-screen .emoji-row span:nth-child(2){animation-delay:.3s;}
+  .start-screen .emoji-row span:nth-child(3){animation-delay:.6s;}
+  .start-screen p{color:var(--muted); font-size:1.4rem; font-weight:600; line-height:1.55; margin:14px 0 22px;}
+  .start-screen ul{text-align:left; max-width:520px; margin:0 auto 22px; color:var(--muted); font-weight:600; font-size:1.3rem; line-height:1.8;}
+  .start-btn{
+    background:linear-gradient(90deg,var(--green),var(--green-dark));
+    color:#fff; border:none; border-radius:20px;
+    padding:20px 42px; font-size:1.6rem; font-weight:800;
+    font-family:inherit; cursor:pointer;
+    box-shadow:0 6px 0 var(--green-dark);
+  }
+  .start-btn:active{transform:translateY(3px); box-shadow:0 2px 0 var(--green-dark);}
+  .hidden{display:none !important;}
+
+  .confetti-piece{
+    position:fixed; top:-20px; width:10px;height:16px; opacity:.9;
+    border-radius:2px; z-index:150; animation-name:confetti-fall;
+    animation-timing-function:linear; animation-fill-mode:forwards; pointer-events:none;
+  }
+  @keyframes confetti-fall{
+    0%{transform:translateY(0) rotate(0deg); opacity:1;}
+    100%{transform:translateY(110vh) rotate(540deg); opacity:.3;}
+  }
+</style>
+</head>
+<body>
+<span class="floaty f1">🌳</span>
+<span class="floaty f2">🦋</span>
+<span class="floaty f3">🍇</span>
+<span class="floaty f4">🌸</span>
+
+<div class="wrap">
+  <h1>🌍🇲🇩 Защитники природы</h1>
+  <p class="subtitle">Командная игра </p>
+
+  <div id="startScreen" class="card start-screen">
+    <div class="emoji-row"><span>🌳</span><span>🏆</span><span>🦌</span></div>
+    <p>Класс делится на <b>3 ряда</b> — три команды!<br>15 вопросов о природе мира и Молдовы, немного сложнее обычного.</p>
+    <ul>
+      <li>Мы читаем вопросы и варианты ответа</li>
+      <li>Команды поднимают руки и отвечают</li>
+      <li>Затем выберите, какому ряду присудить балл</li>
+      <li>В конце узнаем, какой ряд победил!</li>
+    </ul>
+    <button class="start-btn" onclick="startQuiz()">🚀 Начать игру!</button>
+  </div>
+
+  <div id="quizScreen" class="hidden">
+    <div class="teams-bar">
+      <div class="team-chip t1"><div class="tname">🔵 Ряд 1</div><div class="tscore" id="score1">0</div></div>
+      <div class="team-chip t2"><div class="tname">🟣 Ряд 2</div><div class="tscore" id="score2">0</div></div>
+      <div class="team-chip t3"><div class="tname">🟠 Ряд 3</div><div class="tscore" id="score3">0</div></div>
+    </div>
+    <div class="qcounter" id="qCounter">Вопрос 1 из 15</div>
+    <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
+    <div class="card">
+      <div class="qimg-wrap" id="qImageBox"></div>
+      <div class="prompt" id="promptText"></div>
+      <div class="options" id="optionsBox"></div>
+      <div class="feedback" id="feedbackBox"></div>
+      <button class="hint-btn" id="hintBtn" onclick="toggleHint()">💡 Показать подсказку</button>
+      <div class="hint-box" id="hintBox"></div>
+      <div class="nav-row">
+        <button class="next-btn" id="nextBtn" onclick="openTeamModal()">Присудить балл →</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="resultScreen" class="hidden">
+    <div class="card result">
+      <div class="emoji" id="resultEmoji">🏆</div>
+      <h2 id="resultTitle"></h2>
+      <div class="final-scores" id="finalScores"></div>
+      <button class="restart-btn" onclick="restartQuiz()">🔄 Играть ещё раз</button>
+    </div>
+  </div>
+</div>
+
+<div id="modalOverlay" class="modal-overlay hidden">
+  <div class="modal-card">
+    <h3>🏅 Кто ответил правильно?</h3>
+    <p>Выберите, какому ряду присудить балл за этот вопрос</p>
+    <div class="team-buttons">
+      <button class="team-btn b1" onclick="assignPoint(0)">🔵 Ряд 1</button>
+      <button class="team-btn b2" onclick="assignPoint(1)">🟣 Ряд 2</button>
+      <button class="team-btn b3" onclick="assignPoint(2)">🟠 Ряд 3</button>
+    </div>
+    <button class="skip-btn" onclick="assignPoint(-1)">Никто не ответил — пропустить</button>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [
+{"prompt":"Что нужно делать с использованной бумагой, пластиком и стеклом, чтобы помочь природе?","options":["Выбрасывать в реку","Сортировать и сдавать на переработку","Сжигать во дворе","Закапывать в лесу"],"correct":1,"explanation":"Сортировка мусора помогает перерабатывать материалы повторно и не загрязнять природу.","hint":"Подумай, что делают с мусором в контейнерах разных цветов."},
+{"prompt":"Почему нельзя рвать цветы на лугу без надобности?","options":["Потому что они могут быть ядовитыми","Потому что это нужно насекомым для питания и портит природу","Потому что цветы кусаются","Потому что это запрещено только зимой"],"correct":1,"explanation":"Цветы нужны пчёлам и бабочкам для питания, а их семена помогают лугу обновляться.","hint":"Подумай, кто питается нектаром цветов."},
+{"prompt":"Как можно экономить воду дома?","options":["Оставлять кран открытым, пока чистишь зубы","Закрывать кран, когда вода не нужна","Мыть руки по 20 минут","Наполнять ванну до краёв каждый день"],"correct":1,"explanation":"Закрывая кран, когда вода не нужна прямо сейчас, мы бережём пресную воду для всех.","hint":"Подумай, что делать с краном, пока намыливаешь руки."},
+{"prompt":"Почему нужно экономить электричество?","options":["Потому что для его производства часто расходуются природные ресурсы","Потому что электричество бесконечно и его не жалко","Потому что это не влияет на природу","Потому что лампочки любят темноту"],"correct":0,"explanation":"Выключая свет, когда он не нужен, мы экономим ресурсы и снижаем загрязнение воздуха.","hint":"Подумай, откуда берётся энергия для розетки."},
+{"prompt":"Почему важно сажать деревья?","options":["Деревья выделяют кислород и очищают воздух","Деревья мешают строить дома","Деревья нужны только для тени летом","Деревья не приносят пользы"],"correct":0,"explanation":"Деревья поглощают углекислый газ и выделяют кислород, которым мы дышим.","hint":"Подумай, чем мы дышим и что это даёт растениям."},
+{"prompt":"Что произойдёт, если выбросить пластиковый пакет в лесу?","options":["Он сразу исчезнет","Он будет разлагаться сотни лет и вредить животным","Он превратится в цветок","Он станет едой для птиц"],"correct":1,"explanation":"Пластик разлагается очень долго и может навредить животным, которые его проглотят.","hint":"Подумай, сколько лет может лежать пластиковая бутылка в земле."},
+{"prompt":"Какой праздник отмечают 22 апреля во всём мире?","options":["День космонавтики","День Земли","Новый год","День рождения леса"],"correct":1,"explanation":"День Земли отмечают 22 апреля, чтобы напомнить людям о бережном отношении к планете.","hint":"Этот день посвящён нашей планете."},
+{"prompt":"Что лучше использовать вместо одноразовых пластиковых пакетов в магазине?","options":["Многоразовую тканевую сумку","Новый пластиковый пакет каждый раз","Бумагу из тетради","Ничего, просто нести всё в руках"],"correct":0,"explanation":"Многоразовая сумка служит долго и помогает сократить количество пластикового мусора.","hint":"Подумай, что можно использовать много раз подряд."},
+{"prompt":"Чем вредны выхлопные газы машин для природы?","options":["Они загрязняют воздух и вредят здоровью растений, животных и людей","Они полезны для растений, как удобрение","Они не влияют на окружающую среду","Они помогают очищать воздух"],"correct":0,"explanation":"Выхлопные газы содержат вредные вещества, загрязняющие воздух, которым дышат все живые существа.","hint":"Подумай, что выходит из трубы автомобиля."},
+{"prompt":"Как называют людей, которые изучают природу и помогают её защищать?","options":["Экологи","Браконьеры","Загрязнители","Разрушители"],"correct":0,"explanation":"Экологи изучают окружающую среду и помогают сохранять её чистой и здоровой.","hint":"Подумай, кто помогает беречь природу вокруг нас."},
+{"prompt":"Как называется заповедник в центральной Молдове, который охраняет старые леса?","options":["Заповедник «Кодры»","Заповедник «Серенгети»","Национальный парк «Йеллоустоун»","Заповедник «Амазония»"],"correct":0,"explanation":"Заповедник «Кодры» расположен в центральной Молдове и охраняет старые леса региона.","hint":"Слово «кодру» означает «лес» на румынском языке."},
+{"prompt":"Какая главная река Молдовы даёт питьевую воду многим городам?","options":["Нил","Днестр (Нистру)","Амазонка","Темза"],"correct":1,"explanation":"Днестр — одна из главных рек Молдовы, которая снабжает водой многие города и сёла страны.","hint":"Эта же река образует восточную границу Молдовы."},
+{"prompt":"Какое животное, изображённое на гербе Молдовы, стараются беречь в заповедниках?","options":["Зубр (зимбру)","Жираф","Пингвин","Кенгуру"],"correct":0,"explanation":"Зубр (зимбру) изображён на гербе Молдовы, и его стараются сохранить, потому что он очень редкий.","hint":"Это крупное лесное животное с рогами, похожее на быка."},
+{"prompt":"Что такое Красная книга Молдовы?","options":["Список редких и исчезающих растений и животных страны","Атлас мира","Школьный дневник","Конституция Молдовы"],"correct":0,"explanation":"Красная книга Молдовы — это список редких и исчезающих видов, которые нужно особенно беречь.","hint":"Этот документ назван по цвету, который означает опасность."},
+{"prompt":"Какая редкая птица занесена в Красную книгу Молдовы?","options":["Орёл-могильник","Воробей","Курица","Обычный голубь"],"correct":0,"explanation":"Орёл-могильник — редкая хищная птица, которая находится под охраной в Молдове.","hint":"Это крупная хищная птица, а не домашняя."}
+];
+
+const Q_IMAGES = [
+`<svg viewBox="0 0 100 100"><rect x="18" y="35" width="24" height="45" rx="4" fill="#3aa0e8"/><rect x="38" y="30" width="24" height="50" rx="4" fill="#2fb86a"/><rect x="58" y="25" width="24" height="55" rx="4" fill="#ffbe3d"/><path d="M22 35 l6-10 h8 l6 10z" fill="#2b7fc0"/><path d="M42 30 l6-10 h8 l6 10z" fill="#1f8f4f"/><path d="M62 25 l6-10 h8 l6 10z" fill="#e0991a"/><path d="M30 60 l-5 8 h10z" fill="#fff"/><circle cx="50" cy="55" r="6" fill="#fff"/><path d="M70 55 h10 M70 60 h10" stroke="#fff" stroke-width="3"/></svg>`,
+`<svg viewBox="0 0 100 100"><circle cx="50" cy="55" r="18" fill="#ffbe3d"/><g fill="#ff6fa5"><ellipse cx="50" cy="28" rx="10" ry="16"/><ellipse cx="76" cy="45" rx="10" ry="16" transform="rotate(60 76 45)"/><ellipse cx="66" cy="76" rx="10" ry="16" transform="rotate(120 66 76)"/><ellipse cx="34" cy="76" rx="10" ry="16" transform="rotate(-120 34 76)"/><ellipse cx="24" cy="45" rx="10" ry="16" transform="rotate(-60 24 45)"/></g><circle cx="50" cy="55" r="9" fill="#fff"/><circle cx="47" cy="52" r="2.5" fill="#ffbe3d"/><circle cx="53" cy="52" r="2.5" fill="#ffbe3d"/><circle cx="50" cy="58" r="2.5" fill="#ffbe3d"/><ellipse cx="22" cy="20" rx="9" ry="5" fill="#3a3a3a" opacity="0.6"/></svg>`,
+`<svg viewBox="0 0 100 100"><path d="M40 15 h20 v10 h8 l-2 10 h4 l-6 12 h4 l-8 14 l-2 24 h-4 l-2-24 l-8-14 h4 l-6-12 h4 l-2-10 h8z" fill="#3aa0e8"/><ellipse cx="50" cy="88" rx="20" ry="5" fill="#9fd8f0"/><circle cx="34" cy="30" r="4" fill="#bfe8fa"/></svg>`,
+`<svg viewBox="0 0 100 100"><circle cx="50" cy="40" r="24" fill="#ffbe3d"/><rect x="42" y="62" width="16" height="10" fill="#cfcfcf"/><rect x="44" y="72" width="12" height="6" rx="2" fill="#8a8a8a"/><path d="M50 22 v-10 M68 28 l8-8 M32 28 l-8-8 M74 44 h10 M16 44 h10" stroke="#e0991a" stroke-width="4" stroke-linecap="round"/><path d="M46 48 l-4 -10 h6 l-2 -10 l10 14 h-6 z" fill="#fff"/></svg>`,
+`<svg viewBox="0 0 100 100"><rect x="44" y="58" width="12" height="30" fill="#8a5a2b"/><circle cx="50" cy="42" r="26" fill="#2fb86a"/><circle cx="32" cy="52" r="16" fill="#3bcf7a"/><circle cx="68" cy="52" r="16" fill="#3bcf7a"/><ellipse cx="50" cy="88" rx="22" ry="5" fill="#cdeedb"/></svg>`,
+`<svg viewBox="0 0 100 100"><path d="M30 30 q-6 0 -6 8 v30 q0 8 6 8 h40 q6 0 6 -8 v-30 q0 -8 -6 -8z" fill="#3aa0e8" opacity="0.85"/><path d="M30 30 q20 10 40 0" stroke="#2b7fc0" fill="none" stroke-width="3"/><circle cx="40" cy="50" r="4" fill="#fff"/><circle cx="60" cy="58" r="4" fill="#fff"/><rect x="10" y="70" width="14" height="8" rx="2" fill="#6b8f6b"/><rect x="76" y="66" width="14" height="8" rx="2" fill="#6b8f6b"/></svg>`,
+`<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="32" fill="#3aa0e8"/><path d="M30 40 q10 -10 25 -5 q15 5 8 18 q-6 10 -20 6" fill="#2fb86a"/><path d="M55 65 q12 2 15 -10" fill="none" stroke="#2fb86a" stroke-width="5" stroke-linecap="round"/><circle cx="50" cy="50" r="32" fill="none" stroke="#1f3a2c" stroke-width="2" opacity="0.15"/></svg>`,
+`<svg viewBox="0 0 100 100"><path d="M25 35 q-5 0 -5 6 v35 q0 6 5 6 h50 q5 0 5 -6 v-35 q0 -6 -5 -6z" fill="#ffbe3d"/><path d="M38 35 v-8 q0 -6 6 -6 h12 q6 0 6 6 v8" fill="none" stroke="#e0991a" stroke-width="5"/><circle cx="50" cy="58" r="8" fill="#fff" opacity="0.6"/></svg>`,
+`<svg viewBox="0 0 100 100"><rect x="15" y="55" width="55" height="22" rx="5" fill="#ff6f61"/><circle cx="28" cy="80" r="7" fill="#3a3a3a"/><circle cx="58" cy="80" r="7" fill="#3a3a3a"/><rect x="45" y="40" width="20" height="18" rx="3" fill="#ff6f61"/><path d="M78 50 q10 -4 14 4 q4 8 -4 12 q4 6 -2 10" fill="none" stroke="#9a9a9a" stroke-width="4" stroke-linecap="round" opacity="0.8"/></svg>`,
+`<svg viewBox="0 0 100 100"><circle cx="42" cy="42" r="20" fill="none" stroke="#3aa0e8" stroke-width="6"/><line x1="57" y1="57" x2="78" y2="78" stroke="#3aa0e8" stroke-width="8" stroke-linecap="round"/><path d="M30 42 q6 -12 20 -10" fill="none" stroke="#2fb86a" stroke-width="4" stroke-linecap="round"/></svg>`,
+`<svg viewBox="0 0 100 100"><ellipse cx="50" cy="85" rx="35" ry="6" fill="#cdeedb"/><rect x="35" y="50" width="8" height="35" fill="#8a5a2b"/><rect x="58" y="45" width="8" height="40" fill="#6b3f1d"/><circle cx="39" cy="38" r="20" fill="#2fb86a"/><circle cx="62" cy="32" r="22" fill="#3bcf7a"/></svg>`,
+`<svg viewBox="0 0 100 100"><path d="M15 60 q35 -15 70 0 q-10 20 -35 20 q-25 0 -35 -20z" fill="#3aa0e8"/><path d="M20 60 q30 -10 60 0" stroke="#2b7fc0" fill="none" stroke-width="3"/><circle cx="30" cy="55" r="3" fill="#fff"/><circle cx="50" cy="50" r="3" fill="#fff"/><circle cx="70" cy="55" r="3" fill="#fff"/></svg>`,
+`<svg viewBox="0 0 100 100"><ellipse cx="50" cy="55" rx="28" ry="22" fill="#8a5a2b"/><circle cx="50" cy="35" r="16" fill="#8a5a2b"/><path d="M38 25 q-10 -10 -18 -4 q8 10 16 10z" fill="#6b3f1d"/><path d="M62 25 q10 -10 18 -4 q-8 10 -16 10z" fill="#6b3f1d"/><circle cx="44" cy="34" r="2.5" fill="#1f1f1f"/><circle cx="56" cy="34" r="2.5" fill="#1f1f1f"/></svg>`,
+`<svg viewBox="0 0 100 100"><rect x="25" y="15" width="50" height="70" rx="4" fill="#ff6f61"/><rect x="32" y="25" width="36" height="50" fill="#fff" opacity="0.9"/><text x="50" y="55" font-size="26" text-anchor="middle" fill="#ff6f61" font-family="Arial">!</text></svg>`,
+`<svg viewBox="0 0 100 100"><ellipse cx="50" cy="60" rx="26" ry="20" fill="#9b6bd9"/><path d="M50 40 l-14 -22 h28z" fill="#9b6bd9"/><path d="M38 55 l-14 -8 l6 16z" fill="#7a4fb8"/><path d="M62 55 l14 -8 l-6 16z" fill="#7a4fb8"/><circle cx="44" cy="58" r="2.5" fill="#fff"/><circle cx="56" cy="58" r="2.5" fill="#fff"/><path d="M46 66 q4 4 8 0" stroke="#fff" stroke-width="2" fill="none"/></svg>`
+];
+
+let current = 0;
+let answered = false;
+let teamScores = [0,0,0];
+
+function startQuiz(){
+  document.getElementById('startScreen').classList.add('hidden');
+  document.getElementById('quizScreen').classList.remove('hidden');
+  current = 0; answered = false;
+  teamScores = [0,0,0];
+  updateScoreboard();
+  renderQuestion();
+}
+
+function updateScoreboard(){
+  document.getElementById('score1').textContent = teamScores[0];
+  document.getElementById('score2').textContent = teamScores[1];
+  document.getElementById('score3').textContent = teamScores[2];
+}
+
+function renderQuestion(){
+  answered = false;
+  const q = QUESTIONS[current];
+  document.getElementById('qCounter').textContent = `Вопрос ${current+1} из ${QUESTIONS.length}`;
+  document.getElementById('progressBar').style.width = (current/QUESTIONS.length*100) + '%';
+  document.getElementById('promptText').textContent = q.prompt;
+  document.getElementById('qImageBox').innerHTML = Q_IMAGES[current % Q_IMAGES.length];
+  document.getElementById('feedbackBox').className = 'feedback';
+  document.getElementById('feedbackBox').innerHTML = '';
+  document.getElementById('hintBox').className = 'hint-box';
+  document.getElementById('hintBox').textContent = q.hint || '';
+  document.getElementById('hintBtn').style.display = q.hint ? 'inline-block' : 'none';
+  document.getElementById('nextBtn').classList.remove('show');
+
+  const box = document.getElementById('optionsBox');
+  box.innerHTML = '';
+  const letters = ['А','Б','В','Г'];
+  q.options.forEach((optText, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'opt';
+    btn.innerHTML = `<span class="badge">${letters[idx]}</span><span>${optText}</span>`;
+    btn.onclick = () => selectAnswer(idx);
+    box.appendChild(btn);
+  });
+}
+
+function toggleHint(){
+  document.getElementById('hintBox').classList.toggle('show');
+}
+
+function launchConfetti(count){
+  const colors = ['#2fb86a','#3aa0e8','#ffbe3d','#ff6fa5','#9b6bd9','#ff6f61'];
+  for(let i=0;i<count;i++){
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random()*100 + 'vw';
+    piece.style.background = colors[Math.floor(Math.random()*colors.length)];
+    const duration = 2 + Math.random()*1.5;
+    piece.style.animationDuration = duration + 's';
+    piece.style.transform = `rotate(${Math.random()*360}deg)`;
+    document.body.appendChild(piece);
+    setTimeout(() => piece.remove(), duration*1000 + 200);
+  }
+}
+
+function selectAnswer(idx){
+  if(answered) return;
+  answered = true;
+  const q = QUESTIONS[current];
+  const opts = document.querySelectorAll('.opt');
+  opts.forEach(o => o.disabled = true);
+
+  if(idx === q.correct){
+    opts[idx].classList.add('correct');
+    const fb = document.getElementById('feedbackBox');
+    fb.className = 'feedback ok show';
+    fb.innerHTML = `<b>🌟 Правильно!</b>${q.explanation}`;
+  } else {
+    opts[idx].classList.add('wrong');
+    opts[q.correct].classList.add('correct');
+    const fb = document.getElementById('feedbackBox');
+    fb.className = 'feedback bad show';
+    fb.innerHTML = `<b>Правильный ответ другой 🤔</b>${q.explanation}`;
+  }
+  document.getElementById('nextBtn').classList.add('show');
+}
+
+function openTeamModal(){
+  document.getElementById('modalOverlay').classList.remove('hidden');
+}
+
+function assignPoint(teamIdx){
+  document.getElementById('modalOverlay').classList.add('hidden');
+  if(teamIdx >= 0){
+    teamScores[teamIdx]++;
+    updateScoreboard();
+    launchConfetti(18);
+  }
+  current++;
+  if(current >= QUESTIONS.length){
+    showResult();
+  } else {
+    renderQuestion();
+  }
+}
+
+function showResult(){
+  document.getElementById('quizScreen').classList.add('hidden');
+  document.getElementById('resultScreen').classList.remove('hidden');
+
+  const names = ['🔵 Ряд 1','🟣 Ряд 2','🟠 Ряд 3'];
+  const classes = ['t1','t2','t3'];
+  const maxScore = Math.max(...teamScores);
+  const winners = teamScores.map((s,i)=>s===maxScore?i:-1).filter(i=>i>=0);
+
+  const box = document.getElementById('finalScores');
+  box.innerHTML = '';
+  teamScores.forEach((s,i)=>{
+    const chip = document.createElement('div');
+    chip.className = `final-chip ${classes[i]}` + (winners.includes(i) ? ' winner' : '');
+    chip.innerHTML = `<div class="fname">${names[i]}</div><div class="fscore">${s}</div>`;
+    box.appendChild(chip);
+  });
+
+  const emoji = document.getElementById('resultEmoji');
+  const title = document.getElementById('resultTitle');
+  if(winners.length > 1){
+    emoji.textContent = '🤝';
+    title.textContent = `Ничья! Победили сразу ${winners.length} ряда!`;
+  } else {
+    emoji.textContent = '🏆';
+    title.textContent = `Победил ${names[winners[0]]}! Поздравляем!`;
+  }
+  launchConfetti(80);
+}
+
+function restartQuiz(){
+  document.getElementById('resultScreen').classList.add('hidden');
+  document.getElementById('startScreen').classList.remove('hidden');
+}
+</script>
+</body>
+</html>
